@@ -59,3 +59,8 @@ func MakeHostID(hostID string) string {
 func MakePseudoNodeID(parts ...string) string {
 	return makeID("pseudo", parts...)
 }
+
+// MakeOverlayID makes a overlay node ID for rendered nodes.
+func MakeOverlayID(id string) string {
+	return makeID("overlay", id)
+}

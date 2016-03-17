@@ -169,10 +169,16 @@ func (w *Weave) Report() (report.Report, error) {
 
 	r := report.MakeReport()
 	for _, peer := range w.statusCache.Router.Peers {
-		r.Overlay.AddNode(report.MakeOverlayNodeID(peer.Name), report.MakeNodeWith(map[string]string{
+		node := report.MakeNodeWith(map[string]string{
 			WeavePeerName:     peer.Name,
 			WeavePeerNickName: peer.NickName,
-		}))
+		})
+		for _, conn := range peer.Connections {
+			if conn.Outbound {
+				node = node.WithAdjacent(report.MakeOverlayNodeID(conn.Name))
+			}
+		}
+		r.Overlay.AddNode(report.MakeOverlayNodeID(peer.Name), node)
 	}
 	return r, nil
 }

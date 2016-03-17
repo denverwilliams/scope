@@ -74,4 +74,9 @@ var (
 	SelectService = TopologySelector(func(r report.Report) RenderableNodes {
 		return MakeRenderableNodes(r.Service)
 	})
+
+	// SelectOverlay selects the overlay topology.
+	SelectOverlay = TopologySelector(func(r report.Report) RenderableNodes {
+		return MakeRenderableNodes(r.Overlay)
+	})
 )

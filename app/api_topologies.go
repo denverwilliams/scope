@@ -40,6 +40,13 @@ var (
 			}},
 		},
 	}
+	weaveTopology = APITopologyDesc{
+		id:       "weave",
+		parent:   "hosts",
+		renderer: render.WeaveRenderer,
+		Name:     "Weave",
+		Rank:     3,
+	}
 )
 
 func init() {
@@ -243,6 +250,10 @@ func decorateWithStats(rpt report.Report, renderer render.Renderer) topologyStat
 
 func (r *registry) enableKubernetesTopologies() {
 	r.add(kubernetesTopologies...)
+}
+
+func (r *registry) enableWeaveTopology() {
+	r.add(weaveTopology)
 }
 
 func renderedForRequest(r *http.Request, topology APITopologyDesc) render.Renderer {

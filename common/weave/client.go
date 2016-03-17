@@ -33,8 +33,15 @@ type Status struct {
 // Router describes the status of the Weave Router
 type Router struct {
 	Peers []struct {
-		Name     string
-		NickName string
+		Name        string
+		NickName    string
+		Connections []struct {
+			Name        string
+			NickName    string
+			Address     string
+			Outbound    bool
+			Established bool
+		}
 	}
 }
 
