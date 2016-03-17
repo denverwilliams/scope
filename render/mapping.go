@@ -239,9 +239,14 @@ func MapHostIdentity(m RenderableNode, _ report.Networks) RenderableNodes {
 // MapOverlayIdentity maps a overlay topology node to a overlay renderable node.
 func MapOverlayIdentity(m RenderableNode, _ report.Networks) RenderableNodes {
 	var (
-		id          = MakeOverlayID(m.ID)
 		nickname, _ = m.Latest.Lookup(overlay.WeavePeerNickName)
+		_, ok       = m.Latest.Lookup(report.HostNodeID)
 	)
+	if !ok {
+		id := MakePseudoNodeID(m.ID)
+		return RenderableNodes{id: newDerivedPseudoNode(id, nickname, m)}
+	}
+	id := MakeOverlayID(m.ID)
 	node := NewRenderableNodeWith(id, nickname, "", nickname, m)
 	node.Shape = Circle
 	return RenderableNodes{id: node}

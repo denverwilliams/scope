@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/weaveworks/scope/common/backoff"
+	"github.com/weaveworks/scope/common/mtime"
 	"github.com/weaveworks/scope/common/weave"
 	"github.com/weaveworks/scope/probe/docker"
 	"github.com/weaveworks/scope/report"
@@ -33,8 +34,8 @@ const (
 // overlay -- though I'm not sure what that would look like in practice right
 // now.
 type Weave struct {
-	client weave.Client
-	hostID string
+	client     weave.Client
+	hostNodeID string
 
 	mtx         sync.RWMutex
 	statusCache weave.Status
@@ -47,9 +48,9 @@ type Weave struct {
 // address. The address should be an IP or FQDN, no port.
 func NewWeave(hostID string, client weave.Client) *Weave {
 	w := &Weave{
-		client:  client,
-		hostID:  hostID,
-		psCache: map[string]weave.PSEntry{},
+		client:     client,
+		hostNodeID: report.MakeHostNodeID(hostID),
+		psCache:    map[string]weave.PSEntry{},
 	}
 
 	w.backoff = backoff.New(w.collect, "collecting weave info")
@@ -173,6 +174,10 @@ func (w *Weave) Report() (report.Report, error) {
 			WeavePeerName:     peer.Name,
 			WeavePeerNickName: peer.NickName,
 		})
+		if peer.Name == w.statusCache.Router.Name {
+			node = node.WithLatest(report.HostNodeID, mtime.Now(), w.hostNodeID)
+			node = node.WithParents(report.EmptySets.Add(report.Host, report.MakeStringSet(w.hostNodeID)))
+		}
 		for _, conn := range peer.Connections {
 			if conn.Outbound {
 				node = node.WithAdjacent(report.MakeOverlayNodeID(conn.Name))

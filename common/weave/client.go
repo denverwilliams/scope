@@ -32,6 +32,7 @@ type Status struct {
 
 // Router describes the status of the Weave Router
 type Router struct {
+	Name  string
 	Peers []struct {
 		Name        string
 		NickName    string
