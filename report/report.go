@@ -16,7 +16,7 @@ const (
 	Service        = "service"
 	ContainerImage = "container_image"
 	Host           = "host"
-	Overlay        = "overlay"
+	Weave          = "weave"
 )
 
 // Report is the core data type. It's produced by probes, and consumed and
@@ -56,10 +56,10 @@ type Report struct {
 	// probes with each published report. Edges are not present.
 	Host Topology
 
-	// Overlay nodes are active peers in any software-defined network that's
+	// Weave nodes are active peers in the weave software-defined network that's
 	// overlaid on the infrastructure. The information is scraped by polling
-	// their status endpoints. Edges could be present, but aren't currently.
-	Overlay Topology
+	// their status endpoints.
+	Weave Topology
 
 	// Sampling data for this report.
 	Sampling Sampling
@@ -93,7 +93,7 @@ func MakeReport() Report {
 		Host:           MakeTopology(),
 		Pod:            MakeTopology(),
 		Service:        MakeTopology(),
-		Overlay:        MakeTopology(),
+		Weave:          MakeTopology(),
 		Sampling:       Sampling{},
 		Window:         0,
 		ID:             fmt.Sprintf("%d", rand.Int63()),
@@ -110,7 +110,7 @@ func (r Report) Copy() Report {
 		Host:           r.Host.Copy(),
 		Pod:            r.Pod.Copy(),
 		Service:        r.Service.Copy(),
-		Overlay:        r.Overlay.Copy(),
+		Weave:          r.Weave.Copy(),
 		Sampling:       r.Sampling,
 		Window:         r.Window,
 		ID:             fmt.Sprintf("%d", rand.Int63()),
@@ -128,7 +128,7 @@ func (r Report) Merge(other Report) Report {
 	cp.Host = r.Host.Merge(other.Host)
 	cp.Pod = r.Pod.Merge(other.Pod)
 	cp.Service = r.Service.Merge(other.Service)
-	cp.Overlay = r.Overlay.Merge(other.Overlay)
+	cp.Weave = r.Weave.Merge(other.Weave)
 	cp.Sampling = r.Sampling.Merge(other.Sampling)
 	cp.Window += other.Window
 	return cp
@@ -144,7 +144,7 @@ func (r Report) Topologies() []Topology {
 		r.Pod,
 		r.Service,
 		r.Host,
-		r.Overlay,
+		r.Weave,
 	}
 }
 

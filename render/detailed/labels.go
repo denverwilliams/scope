@@ -6,8 +6,8 @@ import (
 	"github.com/weaveworks/scope/probe/docker"
 	"github.com/weaveworks/scope/probe/host"
 	"github.com/weaveworks/scope/probe/kubernetes"
-	"github.com/weaveworks/scope/probe/overlay"
 	"github.com/weaveworks/scope/probe/process"
+	"github.com/weaveworks/scope/probe/weave"
 	"github.com/weaveworks/scope/render"
 )
 
@@ -37,8 +37,8 @@ var labels = map[string]string{
 	kubernetes.Namespace:         "Namespace",
 	kubernetes.PodCreated:        "Created",
 	kubernetes.PodID:             "ID",
-	overlay.WeaveDNSHostname:     "Weave DNS Name",
-	overlay.WeaveMACAddress:      "Weave MAC",
+	weave.WeaveDNSHostname:       "Weave DNS Name",
+	weave.WeaveMACAddress:        "Weave MAC",
 	process.CPUUsage:             "CPU",
 	process.Cmdline:              "Command",
 	process.MemoryUsage:          "Memory",

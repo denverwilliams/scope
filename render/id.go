@@ -60,7 +60,7 @@ func MakePseudoNodeID(parts ...string) string {
 	return makeID("pseudo", parts...)
 }
 
-// MakeOverlayID makes a overlay node ID for rendered nodes.
-func MakeOverlayID(id string) string {
-	return makeID("overlay", id)
+// MakeWeaveID makes a weave node ID for rendered nodes.
+func MakeWeaveID(id string) string {
+	return makeID("weave", id)
 }

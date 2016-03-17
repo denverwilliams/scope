@@ -86,7 +86,7 @@ func TestProbe(t *testing.T) {
 	want.Pod.Controls = nil
 	want.Service.Controls = nil
 	want.Host.Controls = nil
-	want.Overlay.Controls = nil
+	want.Weave.Controls = nil
 
 	p := New(10*time.Millisecond, 100*time.Millisecond, pub)
 	p.AddReporter(mockReporter{want})

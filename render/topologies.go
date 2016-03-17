@@ -298,6 +298,6 @@ var PodServiceRenderer = MakeMap(
 
 // WeaveRenderer is a Renderer which produces a renderable weave topology.
 var WeaveRenderer = MakeMap(
-	MapOverlayIdentity,
-	SelectOverlay,
+	MapWeaveIdentity,
+	SelectWeave,
 )

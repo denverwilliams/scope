@@ -121,9 +121,9 @@ func MakeServiceNodeID(namespaceID, serviceID string) string {
 	return namespaceID + ScopeDelim + serviceID
 }
 
-// MakeOverlayNodeID produces an overlay topology node ID from a router peer's
+// MakeWeaveNodeID produces an weave topology node ID from a router peer's
 // name, which is assumed to be globally unique.
-func MakeOverlayNodeID(peerName string) string {
+func MakeWeaveNodeID(peerName string) string {
 	return "#" + peerName
 }
 

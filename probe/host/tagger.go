@@ -29,7 +29,7 @@ func (t Tagger) Tag(r report.Report) (report.Report, error) {
 		parents  = report.EmptySets.Add(report.Host, report.MakeStringSet(t.hostNodeID))
 	)
 
-	// Explicity don't tag Endpoints, Addresses or Overlays - These topologies include pseudo nodes,
+	// Explicity don't tag Endpoints, Addresses or Weaves - These topologies include pseudo nodes,
 	// and as such do their own host tagging.
 	for _, topology := range []report.Topology{r.Process, r.Container, r.ContainerImage, r.Host} {
 		for id, node := range topology.Nodes {

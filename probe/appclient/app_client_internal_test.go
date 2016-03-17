@@ -75,7 +75,7 @@ func TestAppClientPublish(t *testing.T) {
 	rpt.Pod.Controls = nil
 	rpt.Service.Controls = nil
 	rpt.Host.Controls = nil
-	rpt.Overlay.Controls = nil
+	rpt.Weave.Controls = nil
 
 	s := dummyServer(t, token, id, rpt, done)
 	defer s.Close()

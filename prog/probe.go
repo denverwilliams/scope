@@ -29,8 +29,8 @@ import (
 	"github.com/weaveworks/scope/probe/endpoint/procspy"
 	"github.com/weaveworks/scope/probe/host"
 	"github.com/weaveworks/scope/probe/kubernetes"
-	"github.com/weaveworks/scope/probe/overlay"
 	"github.com/weaveworks/scope/probe/process"
+	weaveProbe "github.com/weaveworks/scope/probe/weave"
 	"github.com/weaveworks/scope/report"
 )
 
@@ -171,7 +171,7 @@ func probeMain() {
 
 	if *weaveAddr != "" {
 		client := weave.NewClient(sanitize.URL("http://", 6784, "")(*weaveAddr))
-		weave := overlay.NewWeave(hostID, client)
+		weave := weaveProbe.NewWeave(hostID, client)
 		defer weave.Stop()
 		p.AddTagger(weave)
 		p.AddReporter(weave)

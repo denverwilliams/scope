@@ -9,8 +9,8 @@ import (
 	"github.com/weaveworks/scope/probe/docker"
 	"github.com/weaveworks/scope/probe/host"
 	"github.com/weaveworks/scope/probe/kubernetes"
-	"github.com/weaveworks/scope/probe/overlay"
 	"github.com/weaveworks/scope/probe/process"
+	"github.com/weaveworks/scope/probe/weave"
 	"github.com/weaveworks/scope/render"
 	"github.com/weaveworks/scope/report"
 )
@@ -32,8 +32,8 @@ var (
 		Set{ID: docker.ContainerIPs},
 		Set{ID: docker.ContainerPorts},
 		Latest{ID: docker.ContainerCreated},
-		Latest{ID: overlay.WeaveMACAddress},
-		Latest{ID: overlay.WeaveDNSHostname},
+		Latest{ID: weave.WeaveMACAddress},
+		Latest{ID: weave.WeaveDNSHostname},
 	}
 	containerImageNodeMetadata = []MetadataRowTemplate{
 		Latest{ID: docker.ImageID, Truncate: 12, Prime: true},

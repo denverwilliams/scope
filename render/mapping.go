@@ -11,8 +11,8 @@ import (
 	"github.com/weaveworks/scope/probe/endpoint"
 	"github.com/weaveworks/scope/probe/host"
 	"github.com/weaveworks/scope/probe/kubernetes"
-	"github.com/weaveworks/scope/probe/overlay"
 	"github.com/weaveworks/scope/probe/process"
+	"github.com/weaveworks/scope/probe/weave"
 	"github.com/weaveworks/scope/report"
 )
 
@@ -236,17 +236,17 @@ func MapHostIdentity(m RenderableNode, _ report.Networks) RenderableNodes {
 	return RenderableNodes{id: node}
 }
 
-// MapOverlayIdentity maps a overlay topology node to a overlay renderable node.
-func MapOverlayIdentity(m RenderableNode, _ report.Networks) RenderableNodes {
+// MapWeaveIdentity maps a weave topology node to a weave renderable node.
+func MapWeaveIdentity(m RenderableNode, _ report.Networks) RenderableNodes {
 	var (
-		nickname, _ = m.Latest.Lookup(overlay.WeavePeerNickName)
+		nickname, _ = m.Latest.Lookup(weave.WeavePeerNickName)
 		_, ok       = m.Latest.Lookup(report.HostNodeID)
 	)
 	if !ok {
 		id := MakePseudoNodeID(m.ID)
 		return RenderableNodes{id: newDerivedPseudoNode(id, nickname, m)}
 	}
-	id := MakeOverlayID(m.ID)
+	id := MakeWeaveID(m.ID)
 	node := NewRenderableNodeWith(id, nickname, "", nickname, m)
 	node.Shape = Circle
 	return RenderableNodes{id: node}

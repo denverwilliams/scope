@@ -1,4 +1,4 @@
-package overlay
+package weave
 
 import (
 	"strings"
@@ -29,9 +29,9 @@ const (
 )
 
 // Weave represents a single Weave router, presumably on the same host
-// as the probe. It is both a Reporter and a Tagger: it produces an Overlay
+// as the probe. It is both a Reporter and a Tagger: it produces an Weave
 // topology, and (in theory) can tag existing topologies with foreign keys to
-// overlay -- though I'm not sure what that would look like in practice right
+// weave -- though I'm not sure what that would look like in practice right
 // now.
 type Weave struct {
 	client     weave.Client
@@ -180,10 +180,10 @@ func (w *Weave) Report() (report.Report, error) {
 		}
 		for _, conn := range peer.Connections {
 			if conn.Outbound {
-				node = node.WithAdjacent(report.MakeOverlayNodeID(conn.Name))
+				node = node.WithAdjacent(report.MakeWeaveNodeID(conn.Name))
 			}
 		}
-		r.Overlay.AddNode(report.MakeOverlayNodeID(peer.Name), node)
+		r.Weave.AddNode(report.MakeWeaveNodeID(peer.Name), node)
 	}
 	return r, nil
 }

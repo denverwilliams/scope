@@ -75,8 +75,8 @@ var (
 		return MakeRenderableNodes(r.Service)
 	})
 
-	// SelectOverlay selects the overlay topology.
-	SelectOverlay = TopologySelector(func(r report.Report) RenderableNodes {
-		return MakeRenderableNodes(r.Overlay)
+	// SelectWeave selects the weave topology.
+	SelectWeave = TopologySelector(func(r report.Report) RenderableNodes {
+		return MakeRenderableNodes(r.Weave)
 	})
 )

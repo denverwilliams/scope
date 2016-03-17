@@ -24,7 +24,7 @@ func (topologyTagger) Tag(r report.Report) (report.Report, error) {
 		report.Pod:            &(r.Pod),
 		report.Service:        &(r.Service),
 		report.Host:           &(r.Host),
-		report.Overlay:        &(r.Overlay),
+		report.Weave:          &(r.Weave),
 	} {
 		for id, node := range t.Nodes {
 			t.AddNode(id, node.WithID(id).WithTopology(name))
