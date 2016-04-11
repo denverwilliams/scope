@@ -135,7 +135,7 @@ class NodesChart extends React.Component {
             <Logo />
           </g>
           <NodesChartElements layoutNodes={nodes} layoutEdges={edges}
-            nodeScale={this.state.nodeScale} scale={scale} transform={transform}
+            nodeScale={this.state.nodeScale} scale={1} transform={transform}
             selectedNodeScale={this.state.selectedNodeScale}
             layoutPrecision={this.props.layoutPrecision} />
         </svg>
@@ -367,12 +367,8 @@ class NodesChart extends React.Component {
     return nextState;
   }
 
-  getNodeScale(nodes, width, height) {
-    const expanse = Math.min(height, width);
-    const nodeSize = expanse / 3; // single node should fill a third of the screen
-    const maxNodeSize = Math.min(MAX_NODE_SIZE, expanse / 10);
-    const normalizedNodeSize = Math.min(nodeSize / Math.sqrt(nodes.size), maxNodeSize);
-    return this.state.nodeScale.copy().range([0, normalizedNodeSize]);
+  getNodeScale() {
+    return this.state.nodeScale.copy().range([0, 64]);
   }
 
   zoomed() {
