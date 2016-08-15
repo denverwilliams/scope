@@ -23,5 +23,5 @@ export const CANVAS_MARGINS = {
 //
 export const BASE_NODE_SIZE = 64;
 export const MAX_NODE_SIZE = 96;
-export const BASE_NODE_LABEL_SIZE = 14;
+export const BASE_NODE_LABEL_SIZE = 24;
 export const MIN_NODE_LABEL_SIZE = BASE_NODE_LABEL_SIZE;

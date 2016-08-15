@@ -8,7 +8,7 @@ import timely from 'timely';
 
 import { clickBackground } from '../actions/app-actions';
 import { EDGE_ID_SEPARATOR } from '../constants/naming';
-import { DETAILS_PANEL_WIDTH, MAX_NODE_SIZE } from '../constants/styles';
+import { DETAILS_PANEL_WIDTH } from '../constants/styles';
 import Logo from '../components/logo';
 import { doLayout } from './nodes-layout';
 import NodesChartElements from './nodes-chart-elements';
