@@ -196,7 +196,6 @@ func (s *DNSSnooper) processDNSMessage(dns *layers.DNS) {
 
 	// Update cache
 	newDomain := string(domainQueried)
-	log.Debugf("DNSSnooper: caught DNS lookup: %s -> %v", newDomain, ips)
 	for ip := range ips {
 		if existingDomains, err := s.reverseDNSCache.Get(ip); err != nil {
 			s.reverseDNSCache.Set(ip, map[string]struct{}{newDomain: {}})
