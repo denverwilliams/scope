@@ -20,8 +20,8 @@ func TestResolverCases(t *testing.T) {
 	tick = func(_ time.Duration) <-chan time.Time { return c }
 
 	ips := map[string][]net.IP{
-		"foo": []net.IP{net.IPv4(192, 168, 0, 1)},
-		"bar": []net.IP{net.IPv4(192, 168, 0, 2), net.IPv4(192, 168, 0, 3)},
+		"foo": {net.IPv4(192, 168, 0, 1)},
+		"bar": {net.IPv4(192, 168, 0, 2), net.IPv4(192, 168, 0, 3)},
 	}
 	lookupIP := func(host string) ([]net.IP, error) {
 		addrs, ok := ips[host]
@@ -64,14 +64,14 @@ func TestResolverCases(t *testing.T) {
 		in       string
 		expected []url.URL
 	}{
-		{"foo", []url.URL{url.URL{Scheme: "http", Host: "192.168.0.1:4040"}}},
-		{"foo:1234", []url.URL{url.URL{Scheme: "http", Host: "192.168.0.1:1234"}}},
-		{"foo:443", []url.URL{url.URL{Scheme: "https", Host: "192.168.0.1:443"}}},
-		{"http://foo:443", []url.URL{url.URL{Scheme: "http", Host: "192.168.0.1:443"}}},
-		{"https://foo:443", []url.URL{url.URL{Scheme: "https", Host: "192.168.0.1:443"}}},
-		{"https://foo", []url.URL{url.URL{Scheme: "https", Host: "192.168.0.1:4040"}}}, // TODO: should this default to port 443?
-		{"user:pass@foo", []url.URL{url.URL{Scheme: "http", Host: "192.168.0.1:4040", User: url.UserPassword("user", "pass")}}},
-		{"bar", []url.URL{url.URL{Scheme: "http", Host: "192.168.0.2:4040"}, url.URL{Scheme: "http", Host: "192.168.0.3:4040"}}},
+		{"foo", []url.URL{{Scheme: "http", Host: "192.168.0.1:4040"}}},
+		{"foo:1234", []url.URL{{Scheme: "http", Host: "192.168.0.1:1234"}}},
+		{"foo:443", []url.URL{{Scheme: "https", Host: "192.168.0.1:443"}}},
+		{"http://foo:443", []url.URL{{Scheme: "http", Host: "192.168.0.1:443"}}},
+		{"https://foo:443", []url.URL{{Scheme: "https", Host: "192.168.0.1:443"}}},
+		{"https://foo", []url.URL{{Scheme: "https", Host: "192.168.0.1:4040"}}}, // TODO: should this default to port 443?
+		{"user:pass@foo", []url.URL{{Scheme: "http", Host: "192.168.0.1:4040", User: url.UserPassword("user", "pass")}}},
+		{"bar", []url.URL{{Scheme: "http", Host: "192.168.0.2:4040"}, {Scheme: "http", Host: "192.168.0.3:4040"}}},
 	} {
 		testResolver(tc.in, tc.expected)
 	}
