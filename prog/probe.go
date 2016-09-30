@@ -7,6 +7,7 @@ import (
 	"net"
 	"net/http"
 	_ "net/http/pprof"
+	"net/url"
 	"os"
 	"strconv"
 	"strings"
@@ -38,7 +39,7 @@ import (
 
 const (
 	versionCheckPeriod = 6 * time.Hour
-	defaultServiceHost = "cloud.weave.works:443"
+	defaultServiceHost = "https://cloud.weave.works:443"
 )
 
 var pluginAPIVersion = "1"
@@ -106,16 +107,21 @@ func probeMain(flags probeFlags) {
 	targets = append(targets, flag.Args()...)
 	log.Infof("publishing to: %s", strings.Join(targets, ", "))
 
-	probeConfig := appclient.ProbeConfig{
-		Token:        flags.token,
-		ProbeVersion: version,
-		ProbeID:      probeID,
-		Insecure:     flags.insecure,
-	}
 	handlerRegistry := controls.NewDefaultHandlerRegistry()
-	clientFactory := func(hostname, endpoint string) (appclient.AppClient, error) {
+	clientFactory := func(hostname string, url url.URL) (appclient.AppClient, error) {
+		token := flags.token
+		if url.User != nil {
+			token, _ = url.User.Password()
+			url.User = nil // erase credentials, as we use a special header
+		}
+		probeConfig := appclient.ProbeConfig{
+			Token:        token,
+			ProbeVersion: version,
+			ProbeID:      probeID,
+			Insecure:     flags.insecure,
+		}
 		return appclient.NewAppClient(
-			probeConfig, hostname, endpoint,
+			probeConfig, hostname, url,
 			xfer.ControlHandlerFunc(handlerRegistry.HandleControlRequest),
 		)
 	}
@@ -126,7 +132,11 @@ func probeMain(flags probeFlags) {
 	if flags.resolver != "" {
 		dnsLookupFn = appclient.LookupUsing(flags.resolver)
 	}
-	resolver := appclient.NewResolver(targets, dnsLookupFn, clients.Set)
+	resolver, err := appclient.NewResolver(targets, dnsLookupFn, clients.Set)
+	if err != nil {
+		log.Fatalf("Failed to create resolver: %v", err)
+		return
+	}
 	defer resolver.Stop()
 
 	p := probe.New(flags.spyInterval, flags.publishInterval, clients, flags.noControls)
@@ -210,7 +220,10 @@ func probeMain(flags probeFlags) {
 			log.Println("Error getting docker bridge ip:", err)
 		} else {
 			weaveDNSLookup := appclient.LookupUsing(dockerBridgeIP + ":53")
-			weaveResolver := appclient.NewResolver([]string{flags.weaveHostname}, weaveDNSLookup, clients.Set)
+			weaveResolver, err := appclient.NewResolver([]string{flags.weaveHostname}, weaveDNSLookup, clients.Set)
+			if err != nil {
+				log.Fatalf("Failed to create weave resolver: %v", err)
+			}
 			defer weaveResolver.Stop()
 		}
 	}
