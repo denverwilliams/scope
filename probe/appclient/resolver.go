@@ -17,10 +17,6 @@ const (
 	dnsPollInterval = 10 * time.Second
 )
 
-var (
-	tick = fastStartTicker
-)
-
 // fastStartTicker is a ticker that 'ramps up' from 1 sec to duration.
 func fastStartTicker(duration time.Duration) <-chan time.Time {
 	c := make(chan time.Time, 1)
@@ -42,19 +38,16 @@ func fastStartTicker(duration time.Duration) <-chan time.Time {
 	return c
 }
 
-type setter func(string, []url.URL)
-
 // Resolver is a thing that can be stopped...
 type Resolver interface {
 	Stop()
 }
 
 type staticResolver struct {
-	setters           []setter
-	targets           []Target
+	ResolverConfig
+
 	failedResolutions map[string]struct{}
 	quit              chan struct{}
-	lookup            LookupIP
 }
 
 // LookupIP type is used for looking up IPs.
@@ -72,16 +65,30 @@ func (t Target) String() string {
 	return net.JoinHostPort(t.hostname, strconv.Itoa(t.port))
 }
 
+// ResolverConfig is the config for a resolver.
+type ResolverConfig struct {
+	Targets []Target
+	Set     func(string, []url.URL)
+
+	// Optional
+	Lookup LookupIP
+	Ticker func(time.Duration) <-chan time.Time
+}
+
 // NewResolver periodically resolves the targets, and calls the set
 // function with all the resolved IPs. It explictiy supports targets which
 // resolve to multiple IPs.  It uses the supplied DNS server name.
-func NewResolver(targets []Target, lookup LookupIP, setters ...setter) (Resolver, error) {
+func NewResolver(config ResolverConfig) (Resolver, error) {
+	if config.Lookup == nil {
+		config.Lookup = net.LookupIP
+	}
+	if config.Ticker == nil {
+		config.Ticker = fastStartTicker
+	}
 	r := staticResolver{
-		targets:           targets,
-		setters:           setters,
+		ResolverConfig:    config,
 		failedResolutions: map[string]struct{}{},
 		quit:              make(chan struct{}),
-		lookup:            lookup,
 	}
 	go r.loop()
 	return r, nil
@@ -111,7 +118,7 @@ func LookupUsing(dnsServer string) func(host string) (ips []net.IP, err error) {
 
 func (r staticResolver) loop() {
 	r.resolve()
-	t := tick(dnsPollInterval)
+	t := r.Ticker(dnsPollInterval)
 	for {
 		select {
 		case <-t:
@@ -133,7 +140,7 @@ func ParseTargets(urls []string) ([]Target, error) {
 	for _, u := range urls {
 		// naked hostnames (such as "localhost") are interpreted as relative URLs
 		// so we add a scheme if u doesn't have one.
-		if !strings.Contains(u, "//") {
+		if !strings.Contains(u, "://") {
 			if strings.HasSuffix(u, ":443") {
 				u = "https://" + u
 			} else {
@@ -171,12 +178,10 @@ func ParseTargets(urls []string) ([]Target, error) {
 }
 
 func (r staticResolver) resolve() {
-	for _, t := range r.targets {
+	for _, t := range r.Targets {
 		ips := r.resolveOne(t)
 		urls := makeURLs(t, ips)
-		for _, setter := range r.setters {
-			setter(t.hostname, urls)
-		}
+		r.Set(t.hostname, urls)
 	}
 }
 
@@ -196,7 +201,7 @@ func (r staticResolver) resolveOne(t Target) []string {
 		addrs = []net.IP{addr}
 	} else {
 		var err error
-		addrs, err = r.lookup(t.hostname)
+		addrs, err = r.Lookup(t.hostname)
 		if err != nil {
 			if _, ok := r.failedResolutions[t.hostname]; !ok {
 				log.Warnf("Cannot resolve '%s': %v", t.hostname, err)

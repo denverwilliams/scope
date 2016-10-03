@@ -301,7 +301,9 @@ func main() {
 			args = append(args, fmt.Sprintf("localhost:%d", xfer.AppPort))
 		}
 		args = append(args, flag.Args()...)
-		log.Infof("publishing to: %s", strings.Join(args, ", "))
+		if !dryRun {
+			log.Infof("publishing to: %s", strings.Join(args, ", "))
+		}
 		targets, err = appclient.ParseTargets(args)
 		if err != nil {
 			log.Fatalf("Invalid targets: %v", err)

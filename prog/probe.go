@@ -117,7 +117,11 @@ func probeMain(flags probeFlags, targets []appclient.Target) {
 	if flags.resolver != "" {
 		dnsLookupFn = appclient.LookupUsing(flags.resolver)
 	}
-	resolver, err := appclient.NewResolver(targets, dnsLookupFn, clients.Set)
+	resolver, err := appclient.NewResolver(appclient.ResolverConfig{
+		Targets: targets,
+		Lookup:  dnsLookupFn,
+		Set:     clients.Set,
+	})
 	if err != nil {
 		log.Fatalf("Failed to create resolver: %v", err)
 		return
@@ -209,7 +213,11 @@ func probeMain(flags probeFlags, targets []appclient.Target) {
 			if err != nil {
 				log.Errorf("Failed to parse weave targets: %v", err)
 			} else {
-				weaveResolver, err := appclient.NewResolver(weaveTargets, weaveDNSLookup, clients.Set)
+				weaveResolver, err := appclient.NewResolver(appclient.ResolverConfig{
+					Targets: weaveTargets,
+					Lookup:  weaveDNSLookup,
+					Set:     clients.Set,
+				})
 				if err != nil {
 					log.Errorf("Failed to create weave resolver: %v", err)
 				} else {

@@ -14,10 +14,8 @@ import (
 )
 
 func TestResolverCases(t *testing.T) {
-	oldTick := tick
-	defer func() { tick = oldTick }()
 	c := make(chan time.Time)
-	tick = func(_ time.Duration) <-chan time.Time { return c }
+	ticker := func(_ time.Duration) <-chan time.Time { return c }
 
 	ips := map[string][]net.IP{
 		"foo": {net.IPv4(192, 168, 0, 1)},
@@ -47,7 +45,12 @@ func TestResolverCases(t *testing.T) {
 			t.Fatal(err)
 		}
 
-		r, err := NewResolver(targets, lookupIP, set)
+		r, err := NewResolver(ResolverConfig{
+			Targets: targets,
+			Lookup:  lookupIP,
+			Set:     set,
+			Ticker:  ticker,
+		})
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -83,10 +86,8 @@ func TestResolverCases(t *testing.T) {
 }
 
 func TestResolver(t *testing.T) {
-	oldTick := tick
-	defer func() { tick = oldTick }()
 	c := make(chan time.Time)
-	tick = func(_ time.Duration) <-chan time.Time { return c }
+	ticker := func(_ time.Duration) <-chan time.Time { return c }
 
 	ipsLock := sync.Mutex{}
 	ips := map[string][]net.IP{}
@@ -120,7 +121,12 @@ func TestResolver(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	r, err := NewResolver(targets, lookupIP, set)
+	r, err := NewResolver(ResolverConfig{
+		Targets: targets,
+		Lookup:  lookupIP,
+		Set:     set,
+		Ticker:  ticker,
+	})
 	if err != nil {
 		t.Fatal(err)
 	}
