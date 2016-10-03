@@ -1,8 +1,6 @@
 package main
 
 import (
-	"flag"
-	"fmt"
 	"math/rand"
 	"net"
 	"net/http"
@@ -10,7 +8,6 @@ import (
 	"net/url"
 	"os"
 	"strconv"
-	"strings"
 	"time"
 
 	log "github.com/Sirupsen/logrus"
@@ -66,7 +63,7 @@ func check(flags map[string]string) {
 }
 
 // Main runs the probe
-func probeMain(flags probeFlags) {
+func probeMain(flags probeFlags, targets []appclient.Target) {
 	setLogLevel(flags.logLevel)
 	setLogFormatter(flags.logPrefix)
 
@@ -94,18 +91,6 @@ func probeMain(flags probeFlags) {
 		checkpointFlags["kubernetes_enabled"] = "true"
 	}
 	go check(checkpointFlags)
-
-	var targets = []string{}
-	if flags.token != "" {
-		// service mode
-		if len(flag.Args()) == 0 {
-			targets = append(targets, defaultServiceHost)
-		}
-	} else if !flags.noApp {
-		targets = append(targets, fmt.Sprintf("localhost:%d", xfer.AppPort))
-	}
-	targets = append(targets, flag.Args()...)
-	log.Infof("publishing to: %s", strings.Join(targets, ", "))
 
 	handlerRegistry := controls.NewDefaultHandlerRegistry()
 	clientFactory := func(hostname string, url url.URL) (appclient.AppClient, error) {
@@ -220,11 +205,17 @@ func probeMain(flags probeFlags) {
 			log.Println("Error getting docker bridge ip:", err)
 		} else {
 			weaveDNSLookup := appclient.LookupUsing(dockerBridgeIP + ":53")
-			weaveResolver, err := appclient.NewResolver([]string{flags.weaveHostname}, weaveDNSLookup, clients.Set)
+			weaveTargets, err := appclient.ParseTargets([]string{flags.weaveHostname})
 			if err != nil {
-				log.Fatalf("Failed to create weave resolver: %v", err)
+				log.Errorf("Failed to parse weave targets: %v", err)
+			} else {
+				weaveResolver, err := appclient.NewResolver(weaveTargets, weaveDNSLookup, clients.Set)
+				if err != nil {
+					log.Errorf("Failed to create weave resolver: %v", err)
+				} else {
+					defer weaveResolver.Stop()
+				}
 			}
-			defer weaveResolver.Stop()
 		}
 	}
 
@@ -248,7 +239,7 @@ func probeMain(flags probeFlags) {
 	if flags.httpListen != "" {
 		go func() {
 			log.Infof("Profiling data being exported to %s", flags.httpListen)
-			log.Infof("go tool pprof http://%s/debug/pprof/{profile,heap,block}", flags.httpListen)
+			log.Infof("go tool proof http://%s/debug/pprof/{profile,heap,block}", flags.httpListen)
 			log.Infof("Profiling endpoint %s terminated: %v", flags.httpListen, http.ListenAndServe(flags.httpListen, nil))
 		}()
 	}

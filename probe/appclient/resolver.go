@@ -51,7 +51,7 @@ type Resolver interface {
 
 type staticResolver struct {
 	setters           []setter
-	targets           []target
+	targets           []Target
 	failedResolutions map[string]struct{}
 	quit              chan struct{}
 	lookup            LookupIP
@@ -60,27 +60,24 @@ type staticResolver struct {
 // LookupIP type is used for looking up IPs.
 type LookupIP func(host string) (ips []net.IP, err error)
 
-type target struct {
+// Target is a parsed representation of the app location.
+type Target struct {
 	original string   // the original url string
 	url      *url.URL // the parsed url
 	hostname string   // the hostname (without port) from the url
 	port     int      // the port, or a sensible default
 }
 
-func (t target) String() string {
+func (t Target) String() string {
 	return net.JoinHostPort(t.hostname, strconv.Itoa(t.port))
 }
 
 // NewResolver periodically resolves the targets, and calls the set
 // function with all the resolved IPs. It explictiy supports targets which
 // resolve to multiple IPs.  It uses the supplied DNS server name.
-func NewResolver(targets []string, lookup LookupIP, setters ...setter) (Resolver, error) {
-	processed, err := prepare(targets)
-	if err != nil {
-		return nil, err
-	}
+func NewResolver(targets []Target, lookup LookupIP, setters ...setter) (Resolver, error) {
 	r := staticResolver{
-		targets:           processed,
+		targets:           targets,
 		setters:           setters,
 		failedResolutions: map[string]struct{}{},
 		quit:              make(chan struct{}),
@@ -129,8 +126,10 @@ func (r staticResolver) Stop() {
 	close(r.quit)
 }
 
-func prepare(urls []string) ([]target, error) {
-	var targets []target
+// ParseTargets deals with missing information in the targets string, defaulting
+// the scheme, port etc.
+func ParseTargets(urls []string) ([]Target, error) {
+	var targets []Target
 	for _, u := range urls {
 		// naked hostnames (such as "localhost") are interpreted as relative URLs
 		// so we add a scheme if u doesn't have one.
@@ -161,7 +160,7 @@ func prepare(urls []string) ([]target, error) {
 		} else {
 			hostname, port = parsed.Host, xfer.AppPort
 		}
-		targets = append(targets, target{
+		targets = append(targets, Target{
 			original: u,
 			url:      parsed,
 			hostname: hostname,
@@ -181,7 +180,7 @@ func (r staticResolver) resolve() {
 	}
 }
 
-func makeURLs(t target, ips []string) []url.URL {
+func makeURLs(t Target, ips []string) []url.URL {
 	result := []url.URL{}
 	for _, ip := range ips {
 		u := *t.url
@@ -191,7 +190,7 @@ func makeURLs(t target, ips []string) []url.URL {
 	return result
 }
 
-func (r staticResolver) resolveOne(t target) []string {
+func (r staticResolver) resolveOne(t Target) []string {
 	var addrs []net.IP
 	if addr := net.ParseIP(t.hostname); addr != nil {
 		addrs = []net.IP{addr}

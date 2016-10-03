@@ -42,7 +42,12 @@ func TestResolverCases(t *testing.T) {
 			}
 		}
 
-		r, err := NewResolver([]string{target}, lookupIP, set)
+		targets, err := ParseTargets([]string{target})
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		r, err := NewResolver(targets, lookupIP, set)
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -110,7 +115,12 @@ func TestResolver(t *testing.T) {
 		}
 	}
 
-	r, err := NewResolver([]string{"symbolic.name" + port, "namewithnoport", ip1 + port, ip2}, lookupIP, set)
+	targets, err := ParseTargets([]string{"symbolic.name" + port, "namewithnoport", ip1 + port, ip2})
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	r, err := NewResolver(targets, lookupIP, set)
 	if err != nil {
 		t.Fatal(err)
 	}
