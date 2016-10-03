@@ -32,7 +32,10 @@ module.exports = {
 
   output: {
     path: path.join(__dirname, 'build/'),
-    filename: '[name].js'
+    filename: '[chunkhash].js',
+    // allow a custom public path to be passed in as part of the build process,
+    // this is useful if you want to serve static content from a CDN, etc.
+    publicPath: process.env.STATIC_CONTENT_PATH || undefined
   },
 
   module: {
@@ -85,7 +88,7 @@ module.exports = {
   plugins: [
     new CleanWebpackPlugin(['build']),
     new webpack.DefinePlugin(GLOBALS),
-    new webpack.optimize.CommonsChunkPlugin('vendors', 'vendors.js'),
+    new webpack.optimize.CommonsChunkPlugin('vendors', '[chunkhash].js'),
     new webpack.optimize.OccurenceOrderPlugin(true),
     new webpack.IgnorePlugin(/^\.\/locale$/, [/moment$/]),
     new webpack.optimize.UglifyJsPlugin({

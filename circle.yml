@@ -30,6 +30,7 @@ dependencies:
     - "cd $SRCDIR/backend; ../tools/rebuild-image weaveworks/scope-backend-build . Dockerfile build.sh && touch $SRCDIR/.scope_backend_build.uptodate"
     - test -z "$SECRET_PASSWORD" || (cd $SRCDIR/integration; ./gce.sh make_template):
         parallel: false
+   - test -z "$WEAVEWORKS_USE_S3" || (sudo apt-get update && sudo apt-get install python-pip && sudo pip install awscli):
 
 test:
   override:
@@ -37,7 +38,7 @@ test:
         parallel: true
     - cd $SRCDIR; COVERDIR=./coverage make RM= tests:
         parallel: true
-    - cd $SRCDIR; make RM= client-test static:
+    - cd $SRCDIR; if test -n "$WEAVEWORKS_USE_S3"; then STATIC_CONTENT_PATH="https://s3.amazonaws.com/static.weave.works/service-ui/" make RM= client-test static; else make RM= client-test static; fi:
         parallel: true
     - cd $SRCDIR; rm -f prog/scope; if [ "$CIRCLE_NODE_INDEX" = "0" ]; then GOARCH=arm make GO_BUILD_INSTALL_DEPS= RM= prog/scope; else GOOS=darwin make GO_BUILD_INSTALL_DEPS= RM= prog/scope; fi:
         parallel: true
@@ -71,6 +72,9 @@ deployment:
             docker tag weaveworks/scope:latest ${DOCKER_ORGANIZATION:-$DOCKER_USER}/scope:latest &&
             docker tag weaveworks/scope:$(./tools/image-tag) ${DOCKER_ORGANIZATION:-$DOCKER_USER}/scope:$(./tools/image-tag)
           )) &&
+          (test -z "${WEAVEWORKS_USE_S3}" ||
+            AWS_ACCESS_KEY_ID=${UI_BUCKET_KEY_ID} AWS_SECRET_ACCESS_KEY=${UI_BUCKET_KEY_SECRET} aws s3 cp client/build/ s3://static.weave.works/service-ui
+          ) &&
           docker push ${DOCKER_ORGANIZATION:-$DOCKER_USER}/scope &&
           docker push ${DOCKER_ORGANIZATION:-$DOCKER_USER}/scope:$(./tools/image-tag) &&
           (test "${DOCKER_ORGANIZATION:-$DOCKER_USER}" != "weaveworks" || (
