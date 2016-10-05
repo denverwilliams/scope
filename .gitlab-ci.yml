@@ -9,7 +9,7 @@ build:
   services:
     - docker:dind
   script:
-    - apt-get update && apt-get -y install make
+    - apk add make
     - make
     # - echo $CI_BUILD_REF_NAME
     # - docker login -u gitlab-ci-token -p $CI_BUILD_TOKEN docker.ii.org.nz
