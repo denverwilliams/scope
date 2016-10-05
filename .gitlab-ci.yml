@@ -4,9 +4,9 @@
 build:
   stage: build
   tags:
-    - shell-runner
-  script:
     - Temp
+  script:
+    - make
     # - echo $CI_BUILD_REF_NAME
     # - docker login -u gitlab-ci-token -p $CI_BUILD_TOKEN docker.ii.org.nz
     # - docker build -t docker.ii.org.nz/$CI_PROJECT_NAMESPACE/handbook:$CI_BUILD_REF_NAME .
