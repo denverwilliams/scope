@@ -9,6 +9,7 @@ build:
   tags: 
     - Temp
   script:
+  - apt-get update && apt-get -y install make
   - make
   # - docker login -u gitlab-ci-token -p $CI_BUILD_TOKEN docker.ii.org.nz
   # - docker build -t docker.ii.org.nz/$CI_PROJECT_NAMESPACE/$CI_PROJECT_NAME:$CI_BUILD_REF_NAME .
