@@ -6,7 +6,7 @@ build:
   tags:
     - Temp
   script:
-    - sudo apt-get update && apt-get -y sudo install make
+    - sudo apt-get update && sudo apt-get -y install make
     - sudo make
     # - echo $CI_BUILD_REF_NAME
     # - docker login -u gitlab-ci-token -p $CI_BUILD_TOKEN docker.ii.org.nz
